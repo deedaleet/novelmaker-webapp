@@ -20,12 +20,30 @@ import { getAppSettings } from '../repo/settings';
 import { streamChat, type StreamEvent } from '../llm/client';
 import { inputNumber, type Prepared } from './promptdata';
 
+/**
+ * Reasoning models spend part of the completion budget on their thinking, and the
+ * engine counts those tokens against max_tokens. Reserve headroom on top of the
+ * derived prose budget so max-effort reasoning does not truncate the answer
+ * (measured on GraceAI: ~1.2k thinking tokens for a 500-word scene).
+ */
+export const REASONING_HEADROOM_TOKENS = 4096;
+
+/** Reasoning effort sent on every request; an explicit collection/request value wins. */
+export const DEFAULT_REASONING_EFFORT = 'max';
+
 export function buildParams(db: DB, model: ModelRef, prep: Prepared | null, override?: Record<string, unknown>): Record<string, unknown> {
   const params: Record<string, unknown> = { ...collectionParams(db, model.providerId, model.modelId), ...(override ?? {}) };
+  // Reasoning is on by default at max effort. An explicit value (collection or request)
+  // wins; null/'' removes the field entirely, which turns reasoning off for that model.
+  if (params.reasoning_effort === undefined) params.reasoning_effort = DEFAULT_REASONING_EFFORT;
   const settings = getAppSettings(db);
   if (prep && params.max_tokens == null && settings.deriveMaxTokens) {
     const words = inputNumber(prep.prompt, prep.components, prep.inputs, WORDS_OPTION_NAMES);
-    if (words && words > 0) params.max_tokens = Math.round(words * settings.maxTokensFactor + settings.maxTokensBuffer);
+    if (words && words > 0) {
+      let maxTokens = Math.round(words * settings.maxTokensFactor + settings.maxTokensBuffer);
+      if (params.reasoning_effort) maxTokens += REASONING_HEADROOM_TOKENS;
+      params.max_tokens = maxTokens;
+    }
   }
   for (const [k, v] of Object.entries(params)) if (v === '' || v === null) delete params[k];
   return params;

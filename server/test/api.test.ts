@@ -347,7 +347,8 @@ describe('API', () => {
     const done = events.find((e) => e.event === 'done')!;
     expect(done.data.promptTokens).toBe(100);
     expect(done.data.cost).toBeCloseTo(100 * 0.000001 + 20 * 0.000002);
-    expect(lastLlmBody.max_tokens).toBe(400 * 2 + 300);
+    expect(lastLlmBody.max_tokens).toBe(400 * 2 + 300 + 4096);
+    expect(lastLlmBody.reasoning_effort).toBe('max');
     expect(lastLlmBody.stream).toBe(true);
     const logs = await api('GET', '/api/logs');
     expect(logs[0].status).toBe('ok');
@@ -373,10 +374,10 @@ describe('API', () => {
     expect(est.promptTokens).toBeGreaterThan(0);
     expect(est.completionBasis).toBe('words');
     expect(est.completionTokens).toBe(720);
-    expect(est.maxCompletionTokens).toBe(400 * 2 + 300);
+    expect(est.maxCompletionTokens).toBe(400 * 2 + 300 + 4096);
     expect(est.pricing).toEqual({ prompt: 0.000001, completion: 0.000002 });
     expect(est.cost).toBeCloseTo(est.promptTokens * 0.000001 + 720 * 0.000002);
-    expect(est.maxCost).toBeCloseTo(est.promptTokens * 0.000001 + 1100 * 0.000002);
+    expect(est.maxCost).toBeCloseTo(est.promptTokens * 0.000001 + (1100 + 4096) * 0.000002);
     expect(est.contextLength).toBe(8000);
     expect(est.local).toBe(false);
     expect(Array.isArray(est.warnings)).toBe(true);

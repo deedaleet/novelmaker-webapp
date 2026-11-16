@@ -5,7 +5,7 @@ import { createCodex, updateCodex } from '../repo/codex';
 import { findModel, getProvider } from '../repo/llm';
 import { getNovel, getOutline, updateChapter, updateNovel, updateScene } from '../repo/novels';
 import { findPromptByKey, getPrompt } from '../repo/prompts';
-import { buildParams, runGeneration } from './generate';
+import { buildParams, REASONING_HEADROOM_TOKENS, runGeneration } from './generate';
 import { inputNumber, prepareRender } from './promptdata';
 
 export interface SummaryJobOptions {
@@ -200,7 +200,8 @@ export class JobManager {
         const params = buildParams(db, o.model, prep, undefined);
         if (params.max_tokens == null) {
           const len = inputNumber(prep.prompt, prep.components, prep.inputs, LENGTH_OPTION_NAMES);
-          if (len) params.max_tokens = Math.round(len * 2 + 300);
+          if (len)
+            params.max_tokens = Math.round(len * 2 + 300) + (params.reasoning_effort ? REASONING_HEADROOM_TOKENS : 0);
         }
         const res = await runGeneration({
           db,

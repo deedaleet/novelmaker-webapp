@@ -24,12 +24,11 @@ cached layers.
 The live deployment is a Compose Manager project on deusnas:
 
 - **Project directory:** `/boot/config/plugins/compose.manager/projects/novelmaker/`
-- The build context is separate from the project directory: keep a checkout of
-  this repo on the host and set `NOVELMAKER_BUILD_CONTEXT` to it in `.env`. The
-  live deusnas deployment uses `/mnt/user/appdata/novelmaker-src`, a read-only
-  deploy-key clone of the Forgejo repo. The project directory then holds only
-  `compose.yaml`, `.env` and the metadata files — no source tree on the flash
-  drive.
+- The build context is separate from appdata: keep a checkout of this repo as
+  `src/` inside the project directory and set `NOVELMAKER_BUILD_CONTEXT=./src` in
+  `.env`. The live deusnas deployment uses
+  `/boot/config/plugins/compose.manager/projects/novelmaker/src`, a read-only
+  deploy-key clone of the Forgejo repo. Appdata stays purely for runtime data.
 - Project metadata: `name=Novelmaker`, `project_name=novelmaker`,
   `autostart=true`, `has_build=1`, and an `icon_url` pointing at a publicly
   fetchable image.
@@ -55,7 +54,7 @@ does not hit the non-root ownership trap.
 |---|---|---|
 | `NOVELMAKER_HTTP_PORT` | `3002` | Host port published for the UI/API |
 | `NOVELMAKER_APPDATA` | `./data` | Host path bound to `/data` |
-| `NOVELMAKER_BUILD_CONTEXT` | `.` | Build context; a checkout path on hosts that keep compose files apart from source |
+| `NOVELMAKER_BUILD_CONTEXT` | `.` | Build context; `./src` on the deusnas deployment (a checkout inside the Compose project directory) |
 | `TZ` | `America/Los_Angeles` | Container timezone |
 
 There are **no secrets in `.env`**. Provider API keys are entered in the app UI
@@ -123,23 +122,24 @@ Verified against this container setup on deusnas (2026-11-15):
   container restarted healthy.
 - Upstream test suite: 115 tests / 9 files pass.
 - **Live deployment source:** the deusnas Compose project builds from
-  `/mnt/user/appdata/novelmaker-src`, a read-only deploy-key clone of the Forgejo
-  repo, via `NOVELMAKER_BUILD_CONTEXT`. It was rebuilt and recreated from that
-  source on 2026-11-15; the image is byte-identical to the earlier pinned-upstream
-  build because the application code has not changed yet.
+  `/boot/config/plugins/compose.manager/projects/novelmaker/src`, a read-only
+  deploy-key clone of the Forgejo repo, via `NOVELMAKER_BUILD_CONTEXT=./src`. It
+  was rebuilt and recreated from that source on 2026-11-15; the image is
+  byte-identical to the earlier pinned-upstream build because the application
+  code has not changed yet.
 
 ## Updating
 
 ```bash
-git -C /mnt/user/appdata/novelmaker-src pull   # deployment build context
+git -C /boot/config/plugins/compose.manager/projects/novelmaker/src pull
 cd /boot/config/plugins/compose.manager/projects/novelmaker
 docker compose build
 docker compose up -d
 ```
 
-`git pull` happens in the build-context checkout, not in the Compose project
-directory. Merge upstream deliberately when you want upstream changes; the
-working repo is on Forgejo.
+`git pull` happens in the `src/` checkout inside the project directory, not in
+appdata. Merge upstream deliberately when you want upstream changes; the working
+repo is on Forgejo.
 
 The image is built locally and has no registry digest, so the host's automated
 image-update tooling will skip it — rebuilds are deliberate, not automatic.

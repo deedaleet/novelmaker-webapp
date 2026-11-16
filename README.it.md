@@ -1,5 +1,7 @@
 # Novelmaker
 
+> **Fork note:** `novelmaker-webapp` is a fork of Novelmaker, re-imagined as a single-user, self-hosted web application. See [CONTAINER.md](CONTAINER.md) for the container build and deployment.
+
 [English](README.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Українська](README.uk.md) · **Italiano** · [Français](README.fr.md)
 
 Un'app locale per scrivere romanzi, con l'aiuto dell'IA integrato nel manoscritto. Novelmaker gira nel tuo browser su `localhost` e conserva tutto in un unico file SQLite sul tuo computer. Funziona con i modelli di IA che scegli tu: tramite OpenRouter oppure con un modello in esecuzione sulla tua macchina (Ollama, LM Studio, KoboldCpp, …).

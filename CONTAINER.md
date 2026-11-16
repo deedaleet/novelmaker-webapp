@@ -24,11 +24,12 @@ cached layers.
 The live deployment is a Compose Manager project on deusnas:
 
 - **Project directory:** `/boot/config/plugins/compose.manager/projects/novelmaker/`
-- Because the Dockerfile builds from the local context, the project directory
-  must contain this repo's **source tree**, not just `compose.yaml`. Clone the
-  repo into that directory (or copy a checkout in), then add a `.env` with the
-  host values and the project metadata files. A `compose.yaml`-only copy will
-  fail the build: it has no `Dockerfile`, `package*.json` or workspace sources.
+- The build context is separate from the project directory: keep a checkout of
+  this repo on the host and set `NOVELMAKER_BUILD_CONTEXT` to it in `.env`. The
+  live deusnas deployment uses `/mnt/user/appdata/novelmaker-src`, a read-only
+  deploy-key clone of the Forgejo repo. The project directory then holds only
+  `compose.yaml`, `.env` and the metadata files — no source tree on the flash
+  drive.
 - Project metadata: `name=Novelmaker`, `project_name=novelmaker`,
   `autostart=true`, `has_build=1`, and an `icon_url` pointing at a publicly
   fetchable image.
@@ -54,6 +55,7 @@ does not hit the non-root ownership trap.
 |---|---|---|
 | `NOVELMAKER_HTTP_PORT` | `3002` | Host port published for the UI/API |
 | `NOVELMAKER_APPDATA` | `./data` | Host path bound to `/data` |
+| `NOVELMAKER_BUILD_CONTEXT` | `.` | Build context; a checkout path on hosts that keep compose files apart from source |
 | `TZ` | `America/Los_Angeles` | Container timezone |
 
 There are **no secrets in `.env`**. Provider API keys are entered in the app UI
@@ -124,10 +126,15 @@ Verified against this container setup on deusnas (2026-11-15):
 ## Updating
 
 ```bash
-git pull                      # or merge upstream deliberately
+git -C /mnt/user/appdata/novelmaker-src pull   # deployment build context
+cd /boot/config/plugins/compose.manager/projects/novelmaker
 docker compose build
 docker compose up -d
 ```
+
+`git pull` happens in the build-context checkout, not in the Compose project
+directory. Merge upstream deliberately when you want upstream changes; the
+working repo is on Forgejo.
 
 The image is built locally and has no registry digest, so the host's automated
 image-update tooling will skip it — rebuilds are deliberate, not automatic.

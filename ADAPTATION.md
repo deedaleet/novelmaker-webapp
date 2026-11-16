@@ -29,10 +29,13 @@ Containerisation only — no application code changes yet:
 - `Dockerfile` — multi-stage build from this repo's own source (not a pinned
   upstream clone), with the single-process launch command required for clean
   SIGTERM shutdown.
-- `compose.yaml` — single-service stack with a configurable host port, data path
-  and timezone.
+- `compose.yaml` — single-service stack with a configurable host port, data path,
+  timezone and build context.
 - `.dockerignore`, `.env.example` — build-context hygiene and non-secret runtime
   values.
 - `CONTAINER.md` — build, deployment, backup and exposure runbook.
+- `README.md` and the translated READMEs — fork banner and a container-deployment
+  section; the English README also corrects the upstream "not in scope" line for
+  single-user, self-hosted use.
 
 The application code is otherwise identical to the upstream base commit above.

@@ -1,5 +1,7 @@
 # Novelmaker
 
+> **Fork note:** `novelmaker-webapp` is a fork of Novelmaker, re-imagined as a single-user, self-hosted web application. See [CONTAINER.md](CONTAINER.md) for the container build and deployment.
+
 [English](README.md) · [Deutsch](README.de.md) · [Español](README.es.md) · **Українська** · [Italiano](README.it.md) · [Français](README.fr.md)
 
 Локальна програма для написання романів, у якій допомога ШІ вбудована просто в рукопис. Novelmaker працює у вашому браузері на `localhost` і зберігає все в одному файлі SQLite на вашому комп’ютері. Моделі ШІ ви обираєте самі: через OpenRouter або модель, що працює на вашому власному комп’ютері (Ollama, LM Studio, KoboldCpp, …).

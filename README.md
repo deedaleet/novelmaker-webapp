@@ -2,6 +2,8 @@
 
 **English** · [Deutsch](README.de.md) · [Español](README.es.md) · [Українська](README.uk.md) · [Italiano](README.it.md) · [Français](README.fr.md)
 
+> **Fork note:** This is [`novelmaker-webapp`](https://github.com/deedaleet/novelmaker-webapp), a fork of Novelmaker re-imagined as a **single-user, self-hosted web application**. The working repository lives on Forgejo; the GitHub repository is a manually published mirror. Container build and deployment are documented in [CONTAINER.md](CONTAINER.md).
+
 A local writing app for novels, with AI help built into the manuscript. Novelmaker runs in your browser on `localhost` and keeps everything in a single SQLite file on your computer. It works with the AI models you choose: through OpenRouter, or with a model running on your own machine (Ollama, LM Studio, KoboldCpp, …).
 
 ![Writing view: outline on the left, the scene in the middle with highlighted character and place names, a codex card for "Isolde Venn", pinned notes and the scene panel on the right](docs/screenshots/writing.png)
@@ -15,6 +17,7 @@ A local writing app for novels, with AI help built into the manuscript. Novelmak
 - [Feature tour](#feature-tour)
 - [Languages](#languages)
 - [Getting started](#getting-started)
+- [Container deployment](#container-deployment)
 - [How it works](#how-it-works)
 - [Importing novels](#importing-novels)
 - [Prompt reference](#prompt-reference)
@@ -49,7 +52,7 @@ What it is built around:
 - **You stay the author.** AI output never silently replaces your text. You accept it, stash it as a variant, regenerate it or throw it away. Before every accepted change, Novelmaker saves a version of the scene.
 - **Multilingual.** Interface and built-in prompts in English, German, Spanish, Ukrainian, Italian and French. Your novel can be in any language your model knows (see [Languages](#languages)).
 
-Not in scope: multiple users, logins, hosting on the internet, a sync service. API keys are stored in plain text in the local database, so don't expose the server beyond `localhost`.
+Not in scope: multiple users, accounts, a sync service. This fork is built for **single-user, self-hosted** use; the app itself has no login, so put a password/IP gate in front of it before exposing it beyond a trusted network. API keys are stored in plain text in the local database.
 
 ## Feature tour
 
@@ -197,6 +200,17 @@ npm start          # server + interface on http://localhost:3000
 5. **Novel** (in the novel's top bar): set language, tense, point of view and POV character. *Additional instructions for the AI* go into every beat and chat prompt.
 6. Write. To get AI help, type `/` in an empty line, choose *Beat*, describe what should happen and press *Generate* (or `Ctrl+Enter`).
 7. Optional: **Data → Storage location & backups** moves the database into a Dropbox or OneDrive folder, so you can work on several computers.
+
+## Container deployment
+
+This fork ships a `Dockerfile` and `compose.yaml` that build the app from this repository's own source. A single-user, self-hosted deployment runs as one container with the library in a mounted data directory:
+
+```sh
+cp .env.example .env
+docker compose up -d --build
+```
+
+See [CONTAINER.md](CONTAINER.md) for Unraid/Compose Manager staging, the data and backup surface, inference wiring, and exposure notes. The app still has no login of its own; put a password/IP gate in front of it before exposing it beyond a trusted network.
 
 ## How it works
 

@@ -20,7 +20,10 @@
 services:
   novelmaker:
     build:
-      context: .
+      # Defaults to this repository (run compose from the repo root). On a
+      # deployment host that keeps compose files separate from source, point
+      # NOVELMAKER_BUILD_CONTEXT at a checkout of this repo instead.
+      context: ${NOVELMAKER_BUILD_CONTEXT:-.}
       dockerfile: Dockerfile
     image: novelmaker:local
     container_name: novelmaker

@@ -122,6 +122,11 @@ Verified against this container setup on deusnas (2026-11-15):
 - `docker stop` produced the app's shutdown backup and released the lock; the
   container restarted healthy.
 - Upstream test suite: 115 tests / 9 files pass.
+- **Live deployment source:** the deusnas Compose project builds from
+  `/mnt/user/appdata/novelmaker-src`, a read-only deploy-key clone of the Forgejo
+  repo, via `NOVELMAKER_BUILD_CONTEXT`. It was rebuilt and recreated from that
+  source on 2026-11-15; the image is byte-identical to the earlier pinned-upstream
+  build because the application code has not changed yet.
 
 ## Updating
 

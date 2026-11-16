@@ -201,7 +201,7 @@ export function beatsFromText(text: string): PMNode[] {
 // ---------------------------------------------------------------- HTML / Markdown
 
 function esc(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function inlineHtml(nodes: PMNode[] | undefined): string {
@@ -255,7 +255,7 @@ export function nodesToHtml(nodes: PMNode[] | undefined, opts: HtmlOptions = {})
           return `<div class="beat-static"><span class="beat-static-label">${esc(t('Beat'))}</span>${inlineHtml(n.content)}</div>`;
         case NOTE_NODE:
           if (opts.manuscript) return '';
-          return `<div class="note-static">${inlineHtml(n.content)}</div>`;
+          return `<div class="note-static" data-label="${esc(t('Note · not part of the manuscript'))}">${inlineHtml(n.content)}</div>`;
         case FRAME_NODE: {
           if (opts.manuscript) return isExcludedFrame(n) ? '' : nodesToHtml(n.content, opts);
           const cls = `frame-static${isExcludedFrame(n) ? ' frame-static-excluded' : ''}`;

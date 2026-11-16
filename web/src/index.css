@@ -110,14 +110,14 @@ body {
   @apply mr-2 rounded bg-amber-200 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-900 dark:bg-amber-800 dark:text-amber-100;
 }
 
-/* Versteckte Notiz */
+/* Versteckte Notiz – Beschriftung kommt übersetzt aus data-label (i18n) */
 .note-node,
 .note-static {
   @apply my-3 rounded-md border border-dashed border-sky-300 bg-sky-50/70 px-3 py-2 font-sans text-[15px] text-sky-950 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-100;
 }
 .note-node::before,
 .note-static::before {
-  content: "Notiz · nicht im Manuskript";
+  content: attr(data-label);
   display: block;
   @apply mb-1 text-[11px] font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-400;
 }

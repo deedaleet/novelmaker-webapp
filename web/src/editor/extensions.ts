@@ -171,7 +171,15 @@ export const HiddenNote = Node.create({
     return [{ tag: 'div[data-type="note"]' }];
   },
   renderHTML({ HTMLAttributes }) {
-    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'note', class: 'note-node' }), 0];
+    return [
+      'div',
+      mergeAttributes(HTMLAttributes, {
+        'data-type': 'note',
+        class: 'note-node',
+        'data-label': t('Note · not part of the manuscript'),
+      }),
+      0,
+    ];
   },
 });
 

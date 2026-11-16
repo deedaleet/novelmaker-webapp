@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { countWords, docToHtml, docToMarkdown, docToPlainText, frameNode, type PMDoc } from '../src';
+import { setLang } from '../src/i18n';
 
 const para = (text: string) => ({ type: 'paragraph', content: [{ type: 'text', text }] });
 
@@ -40,5 +41,20 @@ describe('Rahmen', () => {
     const f = frameNode('Eins.\n\nZwei.', 'Variante 2');
     expect(f.attrs).toEqual({ title: 'Variante 2', excluded: true, collapsed: false });
     expect(f.content).toHaveLength(2);
+  });
+});
+
+describe('Versteckte Notiz', () => {
+  const doc: PMDoc = { type: 'doc', content: [{ type: 'hiddenNote', content: [{ type: 'text', text: 'Später prüfen.' }] }] };
+
+  it('Beschriftung folgt der Oberflächensprache (data-label statt fest im CSS)', () => {
+    expect(docToHtml(doc)).toContain('data-label="Notiz · nicht im Manuskript"');
+    setLang('en');
+    try {
+      expect(docToHtml(doc)).toContain('data-label="Note · not part of the manuscript"');
+    } finally {
+      setLang('de');
+    }
+    expect(docToHtml(doc)).toContain('Später prüfen.');
   });
 });

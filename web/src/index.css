@@ -113,12 +113,20 @@ body {
 /* Versteckte Notiz – Beschriftung kommt übersetzt aus data-label (i18n) */
 .note-node,
 .note-static {
-  @apply my-3 rounded-md border border-dashed border-sky-300 bg-sky-50/70 px-3 py-2 font-sans text-[15px] text-sky-950 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-100;
+  @apply my-3 rounded-md border border-dashed border-sky-300 bg-sky-50/70 font-sans text-[15px] text-sky-950 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-100;
+}
+.note-static {
+  @apply px-3 py-2;
+}
+.note-node .note-content {
+  @apply px-3 py-2;
+  min-height: 1.6em;
 }
 .note-static::before {
   content: attr(data-label);
   display: block;
-  @apply mb-1 text-[11px] font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-400;
+  width: fit-content;
+  @apply mb-1 rounded bg-sky-200 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-900 dark:bg-sky-800 dark:text-sky-100;
 }
 
 /* Rahmen (Varianten, Zwischenstände) – gestrichelt = für die KI ausgeblendet */

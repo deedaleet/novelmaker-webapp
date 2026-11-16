@@ -45,25 +45,6 @@ function inBlock(editor: Editor, name: string) {
   return false;
 }
 
-/** Leere Notiz löschen, wenn die Schreibmarke darin steht (sonst kommt Backspace/Entf nicht an ihr vorbei). */
-function deleteEmptyNote(editor: Editor): boolean {
-  const { selection } = editor.state;
-  if (!selection.empty) return false;
-  const { $from } = selection;
-  if ($from.parent.type.name !== 'hiddenNote' || $from.parentOffset !== 0 || $from.parent.content.size > 0) return false;
-  const pos = $from.before($from.depth);
-  editor
-    .chain()
-    .command(({ tr }) => {
-      const n = tr.doc.nodeAt(pos);
-      if (n?.type.name !== 'hiddenNote') return false;
-      tr.delete(pos, pos + n.nodeSize);
-      return true;
-    })
-    .run();
-  return true;
-}
-
 /** Fügt einen Block hinter dem aktuellen Absatz ein (oder ersetzt einen leeren Absatz). Arbeitet auf der Command-Transaktion. */
 function insertBlock(tr: Transaction, type: string, attrs: Record<string, unknown>, text?: string) {
   const schema = tr.doc.type.schema;
@@ -203,13 +184,6 @@ export const HiddenNote = Node.create({
   },
   addNodeView() {
     return ReactNodeViewRenderer(NoteView);
-  },
-  addKeyboardShortcuts() {
-    // Eine leere Notiz ist isolierend – Backspace/Entf kämen sonst nie an ihr vorbei.
-    return {
-      Backspace: () => deleteEmptyNote(this.editor),
-      Delete: () => deleteEmptyNote(this.editor),
-    };
   },
 });
 

@@ -431,6 +431,7 @@
   "Delete frame including text": "Supprimer le cadre et son texte",
   "Delete message": "Supprimer le message",
   "Delete message?": "Supprimer le message ?",
+  "Delete note": "Supprimer la note",
   "Delete novel": "Supprimer le roman",
   "Delete only the {lang} version": "Supprimer uniquement la version en {lang}",
   "Delete prompt (all languages)": "Supprimer le prompt (toutes les langues)",

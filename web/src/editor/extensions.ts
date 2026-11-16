@@ -7,6 +7,7 @@ import type { Node as PMNode } from '@tiptap/pm/model';
 import { makeId, type CodexMatcher } from '@novelmaker/shared';
 import { BeatView } from './BeatView';
 import { FrameView } from './FrameView';
+import { NoteView } from './NoteView';
 import { locale, N_, t } from '../lib/i18n';
 
 declare module '@tiptap/core' {
@@ -42,6 +43,25 @@ function inBlock(editor: Editor, name: string) {
   const { $from } = editor.state.selection;
   for (let d = $from.depth; d > 0; d--) if ($from.node(d).type.name === name) return true;
   return false;
+}
+
+/** Leere Notiz löschen, wenn die Schreibmarke darin steht (sonst kommt Backspace/Entf nicht an ihr vorbei). */
+function deleteEmptyNote(editor: Editor): boolean {
+  const { selection } = editor.state;
+  if (!selection.empty) return false;
+  const { $from } = selection;
+  if ($from.parent.type.name !== 'hiddenNote' || $from.parentOffset !== 0 || $from.parent.content.size > 0) return false;
+  const pos = $from.before($from.depth);
+  editor
+    .chain()
+    .command(({ tr }) => {
+      const n = tr.doc.nodeAt(pos);
+      if (n?.type.name !== 'hiddenNote') return false;
+      tr.delete(pos, pos + n.nodeSize);
+      return true;
+    })
+    .run();
+  return true;
 }
 
 /** Fügt einen Block hinter dem aktuellen Absatz ein (oder ersetzt einen leeren Absatz). Arbeitet auf der Command-Transaktion. */
@@ -180,6 +200,16 @@ export const HiddenNote = Node.create({
       }),
       0,
     ];
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(NoteView);
+  },
+  addKeyboardShortcuts() {
+    // Eine leere Notiz ist isolierend – Backspace/Entf kämen sonst nie an ihr vorbei.
+    return {
+      Backspace: () => deleteEmptyNote(this.editor),
+      Delete: () => deleteEmptyNote(this.editor),
+    };
   },
 });
 

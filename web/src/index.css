@@ -115,7 +115,6 @@ body {
 .note-static {
   @apply my-3 rounded-md border border-dashed border-sky-300 bg-sky-50/70 px-3 py-2 font-sans text-[15px] text-sky-950 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-100;
 }
-.note-node::before,
 .note-static::before {
   content: attr(data-label);
   display: block;

@@ -3,7 +3,9 @@
 This repository is the working home for re-imagining Novelmaker as a
 **single-user, self-hosted web application**. It is a fork of
 `maniesoft/Novelmaker-public` (AGPL-3.0), based on upstream commit
-`9e8e78589c0bbcabbc41891197033214a7bbeb6a`.
+`9e8e78589c0bbcabbc41891197033214a7bbeb6a`. Upstream `main` is tracked and
+merged deliberately; the tree currently includes upstream through `750c183`
+("Handle LLM connection interruptions", merged 2026-11-16).
 
 ## Remotes
 
@@ -21,7 +23,7 @@ This repository is the working home for re-imagining Novelmaker as a
 
 ## Local delta from upstream
 
-Containerisation only — no application code changes yet:
+### Containerisation
 
 - `Dockerfile` — multi-stage build from this repo's own source (not a pinned
   upstream clone), with the single-process launch command required for clean
@@ -35,4 +37,23 @@ Containerisation only — no application code changes yet:
   section; the English README also corrects the upstream "not in scope" line for
   single-user, self-hosted use.
 
-The application code is otherwise identical to the upstream base commit above.
+### Application changes
+
+- **Reasoning effort** — every generation path defaults to
+  `reasoning_effort: "max"` (`server/src/services/generate.ts`), and derived token
+  budgets include reasoning headroom (`server/src/services/jobs.ts`) so prose is
+  not cut off mid-scene.
+- **Hidden notes** — the note header is rendered from the translation table
+  instead of a hardcoded German CSS string, and a node view gives notes the same
+  header and hover delete control as a beat (`web/src/editor/NoteView.tsx`,
+  `web/src/editor/extensions.ts`, `web/src/index.css`, `shared/src/doc.ts`, the
+  locale files, and a regression test).
+
+### Upstream syncs
+
+- `6037329` — merge of upstream `750c183`: undici-based LLM client without
+  headers/body timeouts for long local-model runs, clearer network-error
+  messages, and the matching locale strings.
+
+The application code is otherwise upstream's, with the changes above applied on
+top.

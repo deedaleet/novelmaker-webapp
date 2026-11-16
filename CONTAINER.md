@@ -93,7 +93,7 @@ front of the UI: IP allowlisting and a password gate. No multi-user accounts.
 
 ## Verification performed
 
-Verified against this container setup (2026-11-15):
+Verified against this container setup (2026-11-16):
 
 - Image builds clean; container starts healthy and serves on the published port.
 - `GET /` returns 200 with `<title>Novelmaker</title>`; `/api/settings`,
@@ -102,7 +102,7 @@ Verified against this container setup (2026-11-15):
   end-to-end (streamed SSE, logged token counts).
 - `docker stop` produced the app's shutdown backup and released the lock; the
   container restarted healthy.
-- Upstream test suite: 115 tests / 9 files pass.
+- Upstream test suite: 116 tests / 9 files pass.
 
 ## Updating
 

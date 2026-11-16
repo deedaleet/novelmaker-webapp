@@ -2,7 +2,7 @@
 
 **English** · [Deutsch](README.de.md) · [Español](README.es.md) · [Українська](README.uk.md) · [Italiano](README.it.md) · [Français](README.fr.md)
 
-> **Fork note:** This is [`novelmaker-webapp`](https://github.com/deedaleet/novelmaker-webapp), a fork of Novelmaker re-imagined as a **single-user, self-hosted web application**. The working repository lives on Forgejo; the GitHub repository is a manually published mirror. Container build and deployment are documented in [CONTAINER.md](CONTAINER.md).
+> **Fork note:** `novelmaker-webapp` is a fork of Novelmaker re-imagined as a **single-user, self-hosted web application**. Container build and deployment are documented in [CONTAINER.md](CONTAINER.md).
 
 A local writing app for novels, with AI help built into the manuscript. Novelmaker runs in your browser on `localhost` and keeps everything in a single SQLite file on your computer. It works with the AI models you choose: through OpenRouter, or with a model running on your own machine (Ollama, LM Studio, KoboldCpp, …).
 
@@ -210,7 +210,7 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-See [CONTAINER.md](CONTAINER.md) for Unraid/Compose Manager staging, the data and backup surface, inference wiring, and exposure notes. The app still has no login of its own; put a password/IP gate in front of it before exposing it beyond a trusted network.
+See [CONTAINER.md](CONTAINER.md) for the container build, data and backup surface, inference wiring, and exposure notes. The app still has no login of its own; put a password/IP gate in front of it before exposing it beyond a trusted network.
 
 ## How it works
 

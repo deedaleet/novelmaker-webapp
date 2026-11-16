@@ -5,8 +5,8 @@
 #     cp .env.example .env      # adjust port / data path / timezone
 #     docker compose up -d --build
 #
-# On Unraid, this file is staged into a Compose Manager project directory as
-# `compose.yaml` (the plugin expects that filename); see CONTAINER.md.
+# This file is named compose.yaml for Docker Compose v2. Run it from this
+# repository's root, or point your compose tooling at it.
 #
 # EXPOSURE: the app has no login of its own. The published port binds all host
 # interfaces, so it is LAN-reachable. Keep it off the WAN with a reverse-proxy

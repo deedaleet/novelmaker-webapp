@@ -24,8 +24,11 @@ cached layers.
 The live deployment is a Compose Manager project on deusnas:
 
 - **Project directory:** `/boot/config/plugins/compose.manager/projects/novelmaker/`
-- Copy this repo's `compose.yaml` there unchanged (the plugin expects that exact
-  filename), plus a `.env` with the host values.
+- Because the Dockerfile builds from the local context, the project directory
+  must contain this repo's **source tree**, not just `compose.yaml`. Clone the
+  repo into that directory (or copy a checkout in), then add a `.env` with the
+  host values and the project metadata files. A `compose.yaml`-only copy will
+  fail the build: it has no `Dockerfile`, `package*.json` or workspace sources.
 - Project metadata: `name=Novelmaker`, `project_name=novelmaker`,
   `autostart=true`, `has_build=1`, and an `icon_url` pointing at a publicly
   fetchable image.
@@ -33,6 +36,8 @@ The live deployment is a Compose Manager project on deusnas:
   Manager UI button runs `compose pull --ignore-buildable`, which is an instant
   no-op for a build-from-source stack — it does not build the image.
 - On Unraid set `NOVELMAKER_APPDATA=/mnt/user/appdata/novelmaker` in `.env`.
+- The default host port 3002 avoids 3000, which the GluetunVPN stack already
+  holds on deusnas.
 
 Pre-start, once:
 

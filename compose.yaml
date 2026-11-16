@@ -1,0 +1,64 @@
+# =============================================================================
+# Novelmaker — single-user, self-hosted web application.
+#
+# Build and run from this repository:
+#     cp .env.example .env      # adjust port / data path / timezone
+#     docker compose up -d --build
+#
+# On Unraid, this file is staged into a Compose Manager project directory as
+# `compose.yaml` (the plugin expects that filename); see CONTAINER.md.
+#
+# EXPOSURE: the app has no login of its own. The published port binds all host
+# interfaces, so it is LAN-reachable. Keep it off the WAN with a reverse-proxy
+# policy until the password/IP gate is added.
+#
+# DATA: /data holds novelmaker.db (the entire library INCLUDING provider API
+# keys in plaintext), config.json and the app's own backups. Losing this volume
+# loses everything; back it up.
+# =============================================================================
+
+services:
+  novelmaker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: novelmaker:local
+    container_name: novelmaker
+    restart: unless-stopped
+    init: true
+    # The shutdown path runs `VACUUM INTO` on the database before exiting.
+    stop_grace_period: 60s
+
+    ports:
+      # host:container — host port is configurable; in-image port stays 3000.
+      - "${NOVELMAKER_HTTP_PORT:-3002}:3000"
+
+    environment:
+      # Required: the app defaults HOST to `localhost`, which is unreachable
+      # from outside the container.
+      HOST: "0.0.0.0"
+      PORT: "3000"
+      # Everything the app owns (db, config.json, backups) lives here.
+      NOVELMAKER_DATA: /data
+      # Do NOT set NOVELMAKER_OPEN: it shells out to a browser opener at startup.
+      TZ: "${TZ:-America/Los_Angeles}"
+
+    volumes:
+      # Irreplaceable user data -> host path (covered by the backup chain).
+      - "${NOVELMAKER_APPDATA:-./data}:/data"
+
+    extra_hosts:
+      # Lets the in-app provider reach the LiteLLM gateway on the host.
+      - "host.docker.internal:host-gateway"
+
+    healthcheck:
+      # The slim image has no curl; probe with the image's own node.
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/api/settings').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

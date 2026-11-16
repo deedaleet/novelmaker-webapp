@@ -18,6 +18,7 @@ NC-Data/
 # Umgebungsvariablen, Logs, Test-Ausgaben
 .env
 .env.*
+!.env.example
 *.log
 coverage/
 

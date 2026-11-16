@@ -24,5 +24,15 @@ This repository is the working home for re-imagining Novelmaker as a
 
 ## Local delta from upstream
 
-None yet. This commit only records the fork topology and the product scope; the
-tree is otherwise identical to the upstream base commit above.
+Containerisation only — no application code changes yet:
+
+- `Dockerfile` — multi-stage build from this repo's own source (not a pinned
+  upstream clone), with the single-process launch command required for clean
+  SIGTERM shutdown.
+- `compose.yaml` — single-service stack with a configurable host port, data path
+  and timezone.
+- `.dockerignore`, `.env.example` — build-context hygiene and non-secret runtime
+  values.
+- `CONTAINER.md` — build, deployment, backup and exposure runbook.
+
+The application code is otherwise identical to the upstream base commit above.

@@ -1,0 +1,21 @@
+# Build context is the repo itself. Keep it small: dependencies and build
+# outputs are regenerated inside the image, and local runtime state never ships.
+.git
+.gitignore
+node_modules
+web/dist
+data
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.db.lock
+*.log
+coverage
+docs
+README*.md
+ADAPTATION.md
+CONTAINER.md
+.env
+.env.*
+!.env.example

@@ -1067,6 +1067,7 @@
   "The chat will be deleted with all its messages. Responses already added to snippets, the Codex, or scenes are kept.": "Le chat sera supprimé avec tous ses messages. Les réponses déjà ajoutées aux extraits, au codex ou aux scènes sont conservées.",
   "The codex entry ({type}) will be deleted along with its links.": "L’entrée du codex ({type}) sera supprimée, ainsi que ses liens.",
   "The codex entry ({type}) will be deleted along with its links. Wherever the character is set as POV, that setting will be reset.": "L’entrée du codex ({type}) sera supprimée, ainsi que ses liens. Partout où ce personnage est défini comme POV, ce réglage sera réinitialisé.",
+  "The connection to {name} was interrupted ({error})": "La connexion à {name} a été interrompue ({error})",
   "The database in {folder} ({n} novels) will be replaced by your current one. It will be copied to the backup folder first.": {
     "one": "La base de données dans {folder} ({n} roman) sera remplacée par votre base actuelle. Elle sera d’abord copiée dans le dossier de sauvegarde.",
     "other": "La base de données dans {folder} ({n} romans) sera remplacée par votre base actuelle. Elle sera d’abord copiée dans le dossier de sauvegarde."

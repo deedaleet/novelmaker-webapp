@@ -1149,6 +1149,7 @@
   "The chat will be deleted with all its messages. Responses already added to snippets, the Codex, or scenes are kept.": "Чат з усіма повідомленнями буде видалено. Відповіді, перенесені в нотатки, кодекс чи сцени, залишаться.",
   "The codex entry ({type}) will be deleted along with its links.": "Запис кодексу ({type}) буде видалено разом зі зв’язками.",
   "The codex entry ({type}) will be deleted along with its links. Wherever the character is set as POV, that setting will be reset.": "Запис кодексу ({type}) буде видалено разом зі зв’язками. Там, де цього персонажа вказано як POV, це значення буде скинуто.",
+  "The connection to {name} was interrupted ({error})": "З’єднання з {name} перервано ({error})",
   "The database in {folder} ({n} novels) will be replaced by your current one. It will be copied to the backup folder first.": {
     "one": "Базу даних у {folder} ({n} роман) буде замінено вашою поточною. Перед цим її буде скопійовано в папку резервних копій.",
     "few": "Базу даних у {folder} ({n} романи) буде замінено вашою поточною. Перед цим її буде скопійовано в папку резервних копій.",

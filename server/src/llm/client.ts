@@ -1,5 +1,11 @@
 // Ein Client für alle OpenAI-kompatiblen APIs (/v1/chat/completions mit Streaming).
 import { t, type Provider, type ProviderModel, type RenderedMessage } from '@novelmaker/shared';
+import { Agent, fetch, type Response } from 'undici';
+
+// Lokale Modelle (LM Studio, Ollama) verarbeiten lange Prompts oft viele Minuten, bevor das erste Token kommt.
+// Das eingebaute fetch bricht nach 5 Minuten ohne Daten ab („terminated“), daher hier ohne Zeitlimit.
+// Abbrechen geht weiterhin über das AbortSignal (Stopp-Knopf, Job abbrechen).
+const llmAgent = new Agent({ headersTimeout: 0, bodyTimeout: 0 });
 
 export class LlmError extends Error {
   constructor(
@@ -32,12 +38,25 @@ async function errorText(res: Response): Promise<string> {
   }
 }
 
+/**
+ * Netzwerkfehler lesbar machen: fetch meldet nur „fetch failed“ bzw. „terminated“, der eigentliche Grund
+ * (z. B. „connect ECONNREFUSED …“, „other side closed“) steht in `cause`.
+ * `connected`: Die Verbindung stand schon (Antwort lief bereits), die Gegenseite hat sie beendet.
+ */
+function networkError(p: Provider, e: Error, connected = false): LlmError {
+  const cause = (e as { cause?: Error & { code?: string } }).cause;
+  const error = cause?.message || cause?.code || e.message;
+  const vars = { name: p.name, error };
+  if (connected || cause?.code === 'UND_ERR_SOCKET') return new LlmError(t('The connection to {name} was interrupted ({error})', vars));
+  return new LlmError(t('{name} is unreachable ({error})', vars));
+}
+
 export async function fetchModels(p: Provider): Promise<ProviderModel[]> {
   let res: Response;
   try {
     res = await fetch(`${p.baseUrl}/models`, { headers: headers(p), signal: AbortSignal.timeout(20000) });
   } catch (e) {
-    throw new LlmError(t('{name} is unreachable ({error})', { name: p.name, error: (e as Error).message }));
+    throw networkError(p, e as Error);
   }
   if (!res.ok) throw new LlmError(`${p.name}: ${res.status} ${await errorText(res)}`, res.status);
   const j = (await res.json()) as { data?: any[]; models?: any[] };
@@ -83,10 +102,16 @@ export async function* streamChat(req: ChatRequest): AsyncGenerator<StreamEvent>
   }
   let res: Response;
   try {
-    res = await fetch(`${provider.baseUrl}/chat/completions`, { method: 'POST', headers: headers(provider), body: JSON.stringify(body), signal });
+    res = await fetch(`${provider.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: headers(provider),
+      body: JSON.stringify(body),
+      signal,
+      dispatcher: llmAgent,
+    });
   } catch (e) {
     if ((e as Error).name === 'AbortError') throw e;
-    throw new LlmError(t('{name} is unreachable ({error})', { name: provider.name, error: (e as Error).message }));
+    throw networkError(provider, e as Error);
   }
   if (!res.ok || !res.body) throw new LlmError(`${provider.name}: ${res.status} ${await errorText(res)}`, res.status);
 
@@ -102,11 +127,16 @@ export async function* streamChat(req: ChatRequest): AsyncGenerator<StreamEvent>
   }
 
   const reader = res.body.getReader();
+  const read = () =>
+    reader.read().catch((e: Error) => {
+      if (e.name === 'AbortError') throw e;
+      throw networkError(provider, e, true);
+    });
   const decoder = new TextDecoder();
   let buf = '';
   try {
     for (;;) {
-      const { value, done } = await reader.read();
+      const { value, done } = await read();
       if (done) break;
       buf += decoder.decode(value, { stream: true });
       let nl: number;

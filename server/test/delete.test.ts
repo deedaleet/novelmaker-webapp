@@ -76,7 +76,7 @@ describe('Löschen', () => {
     expect(count('codex_entries')).toBe(before.codex - 1);
     expect(count('chat_threads')).toBe(before.chats - 1);
     expect(count('chat_messages')).toBe(before.msgs - 1);
-    expect(existsSync(BACKUP_DIR) && readdirSync(BACKUP_DIR).some((f) => f.includes('vor-loeschen'))).toBe(true);
+    expect(existsSync(BACKUP_DIR) && readdirSync(BACKUP_DIR).some((f) => f.includes('pre-delete'))).toBe(true);
     expect(await status('DELETE', `/api/novels/${n.id}`)).toBe(404);
   });
 

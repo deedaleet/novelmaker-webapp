@@ -18,7 +18,7 @@ export function registerNovelRoutes(app: FastifyInstance, { db }: AppContext) {
   /** Vor großen Löschungen (Roman, Serie) die Datenbank sichern. */
   const backupBeforeDelete = () => {
     try {
-      createBackup(db, getAppSettings(db).backupsToKeep, 'vor-loeschen');
+      createBackup(db, getAppSettings(db).backupsToKeep, 'pre-delete');
     } catch (e) {
       console.error(t('Backup before deleting failed: {error}', { error: (e as Error).message }));
     }

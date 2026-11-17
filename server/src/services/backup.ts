@@ -4,7 +4,30 @@ import { backupDir } from '../config';
 import type { DB } from '../db';
 
 /** Nur eigene Sicherungen anfassen – der Ordner ist frei wählbar und kann andere Dateien enthalten. */
-const BACKUP_FILE = /^novelmaker-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}(-[\w-]+)?\.db$/;
+const BACKUP_FILE = /^novelmaker-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}(?:-([\w-]+))?\.db$/;
+
+/** Sprachneutrale Kennungen für den Sicherungsgrund; sie landen unverändert im Dateinamen. */
+export type BackupReason = 'manual' | 'quit' | 'startup' | 'pre-delete' | 'pre-codex-merge' | 'pre-relocate' | 'pre-overwrite';
+
+const REASONS = new Set<string>(['manual', 'quit', 'startup', 'pre-delete', 'pre-codex-merge', 'pre-relocate', 'pre-overwrite']);
+
+/** Ältere Sicherungen tragen deutsche Beschriftungen; sie werden beim Anzeigen auf die Kennungen abgebildet. */
+const LEGACY_REASONS: Record<string, BackupReason> = {
+  manuell: 'manual',
+  beenden: 'quit',
+  start: 'startup',
+  'vor-loeschen': 'pre-delete',
+  'vor-kodex-zusammenfuehren': 'pre-codex-merge',
+  'vor-wechsel': 'pre-relocate',
+  ueberschrieben: 'pre-overwrite',
+};
+
+/** Grund aus einem Sicherungsnamen lesen – auch für alte Dateien mit deutscher Beschriftung. */
+export function backupReason(file: string): BackupReason | null {
+  const raw = BACKUP_FILE.exec(file)?.[1];
+  if (!raw) return null;
+  return LEGACY_REASONS[raw] ?? (REASONS.has(raw) ? (raw as BackupReason) : null);
+}
 
 function stamp(): string {
   const d = new Date();
@@ -16,6 +39,7 @@ export interface BackupInfo {
   file: string;
   size: number;
   createdAt: string;
+  reason: BackupReason | null;
 }
 
 export function listBackups(dir = backupDir()): BackupInfo[] {
@@ -24,16 +48,16 @@ export function listBackups(dir = backupDir()): BackupInfo[] {
     .filter((f) => BACKUP_FILE.test(f))
     .map((f) => {
       const st = statSync(join(dir, f));
-      return { file: f, size: st.size, createdAt: st.mtime.toISOString() };
+      return { file: f, size: st.size, createdAt: st.mtime.toISOString(), reason: backupReason(f) };
     })
     .sort((a, b) => b.file.localeCompare(a.file));
 }
 
 /** Pfad für eine neue Sicherung (legt den Ordner an). */
-export function newBackupPath(label = ''): string {
+export function newBackupPath(reason?: BackupReason): string {
   const dir = backupDir();
   mkdirSync(dir, { recursive: true });
-  return join(dir, `novelmaker-${stamp()}${label ? '-' + label : ''}.db`);
+  return join(dir, `novelmaker-${stamp()}${reason ? '-' + reason : ''}.db`);
 }
 
 /** Vollständige Kopie einer Datenbank (auch während sie offen ist). */
@@ -42,10 +66,10 @@ export function vacuumInto(db: DB, file: string) {
 }
 
 /** Kopie der Datenbank anlegen und nur die letzten N behalten. */
-export function createBackup(db: DB, keep: number, label = ''): string | null {
+export function createBackup(db: DB, keep: number, reason?: BackupReason): string | null {
   const hasData = (db.prepare('SELECT COUNT(*) AS n FROM novels').get() as { n: number }).n > 0;
   if (!hasData) return null;
-  const file = newBackupPath(label);
+  const file = newBackupPath(reason);
   if (existsSync(file)) return file;
   vacuumInto(db, file);
   prune(keep);

@@ -6,15 +6,15 @@ import { dbPath } from './config';
 import { DbHandle, openDb } from './db';
 import { seedBuiltins } from './repo/prompts';
 import { getAppSettings } from './repo/settings';
-import { createBackup, listBackups } from './services/backup';
+import { createBackup, listBackups, type BackupReason } from './services/backup';
 import { SystemControl } from './services/system';
 
 const PORT = Number(process.env.PORT ?? 3000);
 const HOST = process.env.HOST ?? 'localhost';
 
-function backup(handle: DbHandle, label: string) {
+function backup(handle: DbHandle, reason: BackupReason) {
   try {
-    const file = createBackup(handle.db, getAppSettings(handle.db).backupsToKeep, label);
+    const file = createBackup(handle.db, getAppSettings(handle.db).backupsToKeep, reason);
     if (file) console.log(t('Backup created: {file}', { file }));
   } catch (e) {
     console.warn(t('Backup failed: {error}', { error: (e as Error).message }));
@@ -42,7 +42,7 @@ async function main() {
   }
   // beim Start nur sichern, wenn sich die Datei seit der letzten Sicherung geändert hat (z. B. auf einem anderen Rechner)
   const last = listBackups()[0];
-  if (!last || statSync(file).mtimeMs > new Date(last.createdAt).getTime() + 1000) backup(handle, 'start');
+  if (!last || statSync(file).mtimeMs > new Date(last.createdAt).getTime() + 1000) backup(handle, 'startup');
   seedBuiltins(handle.db);
   const app = await buildApp(handle.db, { logger: true, system });
 
@@ -51,7 +51,7 @@ async function main() {
     if (stopping) return;
     stopping = true;
     console.log('\n' + t('Novelmaker is shutting down ({reason})…', { reason }));
-    backup(handle, 'beenden');
+    backup(handle, 'quit');
     system.lock.release();
     try {
       await Promise.race([app.close(), new Promise((r) => setTimeout(r, 1500))]);

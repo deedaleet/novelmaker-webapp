@@ -18,7 +18,7 @@ export function registerCodexRoutes(app: FastifyInstance, { db }: AppContext) {
   /** Band-Einträge, die es auch auf Serienebene gibt (z. B. nach dem Import eines Bandes in eine Serie) */
   app.get<{ Params: P }>('/api/novels/:id/codex/duplicates', async (req) => C.findCodexDuplicates(db, req.params.id));
   app.post<{ Params: P }>('/api/novels/:id/codex/merge-duplicates', async (req) => {
-    createBackup(db, getAppSettings(db).backupsToKeep, 'vor-kodex-zusammenfuehren');
+    createBackup(db, getAppSettings(db).backupsToKeep, 'pre-codex-merge');
     return C.mergeCodexDuplicates(db, req.params.id);
   });
   app.get<{ Params: P }>('/api/codex/:id', async (req) => C.getCodex(db, req.params.id));

@@ -153,14 +153,14 @@ export class SystemControl {
     let note = '';
 
     if (mode === 'use-existing') {
-      createBackup(this.db, keep, 'vor-wechsel');
+      createBackup(this.db, keep, 'pre-relocate');
       note = t('The previous database stays at {file}.', { file: oldFile });
     } else {
       if (mode === 'overwrite') {
         // die vorhandene Datei vorher in den Sicherungsordner kopieren
         const src = new Database(check.file, { fileMustExist: true });
         try {
-          vacuumInto(src, newBackupPath('ueberschrieben'));
+          vacuumInto(src, newBackupPath('pre-overwrite'));
         } finally {
           src.close();
         }

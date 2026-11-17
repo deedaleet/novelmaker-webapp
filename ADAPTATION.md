@@ -44,6 +44,12 @@ merged deliberately; the tree currently includes upstream through `a939656`
   `reasoning_effort: "max"` (`server/src/services/generate.ts`), and derived token
   budgets include reasoning headroom (`server/src/services/jobs.ts`) so prose is
   not cut off mid-scene; `server/test/api.test.ts` asserts both.
+- **Language-neutral backup names** — backups carry a stable ASCII reason token
+  (`manual`, `quit`, `startup`, `pre-delete`, `pre-codex-merge`, `pre-relocate`,
+  `pre-overwrite`) instead of German labels, so the filename never depends on the
+  UI language; existing German-named backups stay valid and are mapped for
+  display, and Settings shows a translated reason badge (`server/src/services/backup.ts`,
+  the call sites, `web/src/pages/SettingsPage.tsx`, locale files, regression test).
 
 The hidden-note fix (translated header via `data-label`, node view with a
 hover-only delete control) was a fork delta until upstream adopted it verbatim

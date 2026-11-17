@@ -29,7 +29,7 @@ export function registerSystemRoutes(app: FastifyInstance, { db, system }: AppCo
     return { ok: true };
   });
 
-  app.post('/api/backups', async () => ({ file: createBackup(db, getAppSettings(db).backupsToKeep, 'manuell') }));
+  app.post('/api/backups', async () => ({ file: createBackup(db, getAppSettings(db).backupsToKeep, 'manual') }));
 
   /** Novelmaker beenden: Sicherung anlegen, Sperre lösen, Server stoppen (das Konsolenfenster schließt sich dann). */
   app.post('/api/system/shutdown', async (_req, reply) => {

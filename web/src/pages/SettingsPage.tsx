@@ -14,6 +14,20 @@ import { TranslatePage } from './TranslatePage';
 type Tab = 'providers' | 'collections' | 'general' | 'logs' | 'data';
 // „translate“ (Übersetzungstabelle) hat keinen eigenen Reiter – erreichbar über Allgemein → Sprache.
 
+/** Übersetzte Beschriftung zum sprachneutralen Grund im Sicherungsnamen. */
+function backupReasonLabel(reason: string | null): string | null {
+  switch (reason) {
+    case 'manual': return t('Manual backup');
+    case 'quit': return t('Backup on quit');
+    case 'startup': return t('Backup at startup');
+    case 'pre-delete': return t('Backup before deleting');
+    case 'pre-codex-merge': return t('Backup before merging codex');
+    case 'pre-relocate': return t('Backup before changing database location');
+    case 'pre-overwrite': return t('Backup of overwritten database');
+    default: return null;
+  }
+}
+
 export function SettingsPage() {
   const { tab: rawTab = 'providers' } = useParams();
   const tab = rawTab === 'backup' ? 'data' : rawTab;
@@ -664,14 +678,24 @@ function DataSettings() {
           </div>
         </div>
         <div className="mt-3 rounded-lg border border-stone-200 dark:border-stone-800">
-          {info.backups.map((b) => (
-            <div key={b.file} className="flex justify-between gap-2 border-b border-stone-100 px-3 py-1.5 last:border-0 dark:border-stone-800">
-              <span className="truncate font-mono text-xs">{b.file}</span>
-              <span className="shrink-0 text-xs text-stone-500">
-                {formatDate(b.createdAt)} · {(b.size / 1024 / 1024).toFixed(2)} MB
-              </span>
-            </div>
-          ))}
+          {info.backups.map((b) => {
+            const reason = backupReasonLabel(b.reason);
+            return (
+              <div key={b.file} className="flex justify-between gap-2 border-b border-stone-100 px-3 py-1.5 last:border-0 dark:border-stone-800">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="truncate font-mono text-xs">{b.file}</span>
+                  {reason && (
+                    <span className="shrink-0 rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+                      {reason}
+                    </span>
+                  )}
+                </div>
+                <span className="shrink-0 text-xs text-stone-500">
+                  {formatDate(b.createdAt)} · {(b.size / 1024 / 1024).toFixed(2)} MB
+                </span>
+              </div>
+            );
+          })}
           {!info.backups.length && <div className="p-3 text-stone-500">{t('No backups yet.')}</div>}
         </div>
         <p className="mt-2 text-xs text-stone-500">

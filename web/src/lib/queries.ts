@@ -59,7 +59,7 @@ export interface SystemInfo {
   lockWarning: { host: string; since: string; heartbeat: string } | null;
   conflicts: { file: string; modified: string }[];
   suggestions: { label: string; path: string }[];
-  backups: { file: string; size: number; createdAt: string }[];
+  backups: { file: string; size: number; createdAt: string; reason: string | null }[];
 }
 
 // Laufende Speichervorgänge pro Szene: vor dem Laden abwarten, damit nichts Veraltetes erscheint

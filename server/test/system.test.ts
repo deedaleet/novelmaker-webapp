@@ -95,6 +95,28 @@ describe('Speicherort und Sicherung', () => {
     expect(info.backups).toHaveLength(1);
   });
 
+  it('Sicherungsnamen nutzen sprachneutrale Gründe und bilden alte deutsche Namen ab', async () => {
+    const dir = join(root, 'gruende-sicherungen');
+    await api('POST', '/api/system/backup-dir', { folder: dir });
+    await api('PATCH', '/api/settings', { backupsToKeep: 20 });
+    await api('POST', '/api/backups');
+    const legacy: Record<string, string> = {
+      'novelmaker-2026-11-16_09-45-00-start.db': 'startup',
+      'novelmaker-2026-11-16_09-45-00-beenden.db': 'quit',
+      'novelmaker-2026-11-16_09-45-00-vor-loeschen.db': 'pre-delete',
+      'novelmaker-2026-11-16_09-45-00-vor-kodex-zusammenfuehren.db': 'pre-codex-merge',
+      'novelmaker-2026-11-16_09-45-00-vor-wechsel.db': 'pre-relocate',
+      'novelmaker-2026-11-16_09-45-00-ueberschrieben.db': 'pre-overwrite',
+    };
+    for (const f of Object.keys(legacy)) writeFileSync(join(dir, f), 'alt');
+    const info = await api('GET', '/api/system');
+    const manual = info.backups.find((b: any) => b.reason === 'manual');
+    expect(manual?.file).toMatch(/-manual\.db$/);
+    for (const [file, reason] of Object.entries(legacy)) {
+      expect(info.backups.find((b: any) => b.file === file)?.reason).toBe(reason);
+    }
+  });
+
   it('verschiebt die Datenbank in einen anderen Ordner und arbeitet dort weiter', async () => {
     const before = (await api('GET', '/api/novels')).length;
     const cloud = join(root, 'Dropbox', 'Novelmaker');

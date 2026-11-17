@@ -4,8 +4,9 @@ This repository is the working home for re-imagining Novelmaker as a
 **single-user, self-hosted web application**. It is a fork of
 `maniesoft/Novelmaker-public` (AGPL-3.0), based on upstream commit
 `9e8e78589c0bbcabbc41891197033214a7bbeb6a`. Upstream `main` is tracked and
-merged deliberately; the tree currently includes upstream through `750c183`
-("Handle LLM connection interruptions", merged 2026-11-16).
+merged deliberately; the tree currently includes upstream through `a939656`
+("Localize remaining hardcoded UI strings and export headings", merged
+2026-11-17).
 
 ## Remotes
 
@@ -42,15 +43,20 @@ merged deliberately; the tree currently includes upstream through `750c183`
 - **Reasoning effort** — every generation path defaults to
   `reasoning_effort: "max"` (`server/src/services/generate.ts`), and derived token
   budgets include reasoning headroom (`server/src/services/jobs.ts`) so prose is
-  not cut off mid-scene.
-- **Hidden notes** — the note header is rendered from the translation table
-  instead of a hardcoded German CSS string, and a node view gives notes the same
-  header and hover delete control as a beat (`web/src/editor/NoteView.tsx`,
-  `web/src/editor/extensions.ts`, `web/src/index.css`, `shared/src/doc.ts`, the
-  locale files, and a regression test).
+  not cut off mid-scene; `server/test/api.test.ts` asserts both.
+
+The hidden-note fix (translated header via `data-label`, node view with a
+hover-only delete control) was a fork delta until upstream adopted it verbatim
+in `92e2bc1`; it is now upstream code and no longer part of our delta.
 
 ### Upstream syncs
 
+- `ad3aaf9` — merge of upstream `a939656`: localized export headings, novel-cover
+  and prompts-page strings, and the matching locale keys and tests. This sync
+  also brought in `92e2bc1`, upstream's adoption of our hidden-note fix
+  (identical blobs for `shared/src/doc.ts`, `web/src/editor/NoteView.tsx`,
+  `web/src/editor/extensions.ts`, `web/src/index.css` and the regression test),
+  so that delta is retired.
 - `6037329` — merge of upstream `750c183`: undici-based LLM client without
   headers/body timeouts for long local-model runs, clearer network-error
   messages, and the matching locale strings.

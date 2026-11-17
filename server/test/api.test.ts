@@ -486,6 +486,13 @@ describe('API', () => {
     expect(clip.html).not.toContain('Beat-Text');
     expect(clip.text).toContain('Carla traf Marias Bruder.');
     expect(clip.words).toBe(7);
+    // Ersatzüberschriften stehen im Manuskript: Sprache des Romans, nicht der Oberfläche (hier Deutsch)
+    const { language } = await api('GET', `/api/novels/${novelId}`);
+    await api('PATCH', `/api/novels/${novelId}`, { language: 'English (US)' });
+    const clipEn = await api('GET', `/api/novels/${novelId}/export/clipboard?scope=chapter&item=${ch1.id}`);
+    expect(clipEn.label).toBe('Chapter 1');
+    expect(clipEn.html).toContain('<h2>Scene 2</h2>');
+    await api('PATCH', `/api/novels/${novelId}`, { language });
     // einzelne Szene: nur der Text, ohne Beat
     const s = await api('GET', `/api/novels/${novelId}/export/clipboard?scope=scene&item=${ch1.scenes[1].id}`);
     expect(s.html).toBe('<p>Carla traf Marias Bruder.</p>');

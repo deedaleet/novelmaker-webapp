@@ -1,5 +1,6 @@
 // Buchcover: hochgeladenes Bild oder ein schlichter Platzhalter mit dem Titel.
 import type { Novel } from '@novelmaker/shared';
+import { t } from '../lib/i18n';
 import { cn } from './ui';
 
 export const coverUrl = (n: Pick<Novel, 'id' | 'coverVersion'>) => (n.coverVersion ? `/api/novels/${n.id}/cover?v=${encodeURIComponent(n.coverVersion)}` : null);
@@ -17,10 +18,10 @@ export function NovelCover({ novel, className }: { novel: Pick<Novel, 'id' | 'ti
   return (
     <div className={cn('aspect-[2/3] overflow-hidden rounded-md shadow-sm ring-1 ring-stone-900/10 dark:ring-white/10', className)}>
       {url ? (
-        <img src={url} alt={`Cover von ${novel.title}`} className="size-full object-cover" loading="lazy" />
+        <img src={url} alt={t('Cover of {title}', { title: novel.title || t('Untitled') })} className="size-full object-cover" loading="lazy" />
       ) : (
         <div className={cn('flex size-full flex-col justify-between bg-gradient-to-b p-2 text-white', tone(novel.title || novel.id))}>
-          <div className="line-clamp-4 font-serif text-[13px] leading-tight font-semibold">{novel.title || 'Ohne Titel'}</div>
+          <div className="line-clamp-4 font-serif text-[13px] leading-tight font-semibold">{novel.title || t('Untitled')}</div>
           {novel.author && <div className="truncate text-[10px] opacity-75">{novel.author}</div>}
         </div>
       )}

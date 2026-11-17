@@ -342,7 +342,15 @@ function PromptWorkbench({ prompt, lang, onLang, all, onDirty }: { prompt: Promp
   const addInputTemplate = (kind: 'words' | 'text' | 'context' | 'scene') => {
     // Eingabefelder im Novelcrafter-Format (englische Namen, wie dort üblich)
     const tpl: Record<string, PromptInput> = {
-      words: { name: 'Words', description: 'How many words?', required: true, mode: 'single', types: ['dropdown', 'text'], default: [{ type: 'uiDropdown', id: '1' }], settings: { dropdown: { options: ['200', '400', '600'] }, text: { placeholder: 'e.g. 300' } } },
+      words: {
+        name: 'Words',
+        description: t('How many words?'),
+        required: true,
+        mode: 'single',
+        types: ['dropdown', 'text'],
+        default: [{ type: 'uiDropdown', id: '1' }],
+        settings: { dropdown: { options: ['200', '400', '600'] }, text: { placeholder: t('e.g. {example}', { example: '300' }) } },
+      },
       text: { name: 'Instruction', description: t('Free text input'), mode: 'single', types: ['text'], settings: { text: { placeholder: '' } } },
       context: { name: 'Additional Context', description: t('Additional context'), mode: 'multiple', addToContext: true, displayName: 'Context', types: ['act', 'chapter', 'scene', 'snippet', 'codex', 'fullNovel'] },
       scene: { name: 'Scene', description: t('A scene'), required: true, mode: 'single', types: ['scene'], addToContext: true, settings: { scene: { mode: 'summary' } } },
@@ -609,8 +617,8 @@ function PromptWorkbench({ prompt, lang, onLang, all, onDirty }: { prompt: Promp
                 <div className="flex h-full flex-col">
                   <div className="flex items-center gap-2 px-4 py-1.5">
                     <Select value={msg.type} onChange={(e) => setMessage(idx, { type: e.target.value as MessageRole })} className="h-7 w-36 text-[13px]">
-                      <option value="system">System</option>
-                      <option value="user">User</option>
+                      <option value="system">{t('System (rules)')}</option>
+                      <option value="user">{t('User (you)')}</option>
                       <option value="assistant">{t('Assistant (AI)')}</option>
                     </Select>
                     <Button size="xs" variant="ghost" disabled={idx === 0} onClick={() => moveMessage(idx, -1)}>

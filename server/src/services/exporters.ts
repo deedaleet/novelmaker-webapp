@@ -1,6 +1,6 @@
 // Export (Word, Markdown, Zwischenablage) – ganzer Roman oder ein Akt, Kapitel bzw. eine Szene. Import: siehe importers.ts.
 import { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
-import { countWords, docToMarkdown, docToPlainText, FRAME_NODE, isExcludedFrame, nodesToHtml, t, type Novel, type PMDoc, type PMNode } from '@novelmaker/shared';
+import { countWords, docToMarkdown, docToPlainText, FRAME_NODE, isExcludedFrame, nodesToHtml, novelTextLang, t, type Lang, type Novel, type PMDoc, type PMNode } from '@novelmaker/shared';
 import { notFound, type DB } from '../db';
 import { getFullScenes, getOutline } from '../repo/novels';
 
@@ -24,9 +24,10 @@ export interface ExportPlan {
   blocks: Block[];
 }
 
-const actLabel = (title: string, n: number) => (title.trim() ? t('Act {n}: {title}', { n, title: title.trim() }) : t('Act {n}', { n }));
-const chapterLabel = (title: string, n: number) => title.trim() || t('Chapter {n}', { n });
-const sceneLabel = (title: string, n: number) => title.trim() || t('Scene {n}', { n });
+// Ersatzüberschriften stehen im Manuskript – daher in der Sprache des Romans, nicht der Oberfläche
+const actLabel = (title: string, n: number, l: Lang) => (title.trim() ? t('Act {n}: {title}', { n, title: title.trim() }, l) : t('Act {n}', { n }, l));
+const chapterLabel = (title: string, n: number, l: Lang) => title.trim() || t('Chapter {n}', { n }, l);
+const sceneLabel = (title: string, n: number, l: Lang) => title.trim() || t('Scene {n}', { n }, l);
 
 /**
  * Was in welcher Reihenfolge exportiert wird. Überschriften-Ebenen beginnen beim exportierten Teil mit 1
@@ -39,13 +40,14 @@ export function planExport(db: DB, novelId: string, scope: ExportScope, itemId: 
   let label = outline.novel.title;
   let found = scope === 'novel';
   const multiAct = outline.acts.length > 1;
+  const lang = novelTextLang(outline.novel.language);
 
   const addScenes = (ch: (typeof outline.acts)[number]['chapters'][number], level: number) => {
     let first = true;
     ch.scenes.forEach((s, i) => {
       const content = scenes.get(s.id)?.content;
       if (opts.sceneHeadings) {
-        blocks.push({ kind: 'heading', level, text: sceneLabel(s.title, i + 1), part: 'scene' });
+        blocks.push({ kind: 'heading', level, text: sceneLabel(s.title, i + 1, lang), part: 'scene' });
         if (content) blocks.push({ kind: 'text', content });
         return;
       }
@@ -61,14 +63,14 @@ export function planExport(db: DB, novelId: string, scope: ExportScope, itemId: 
     const wholeAct = scope === 'novel' || (scope === 'act' && act.id === itemId);
     if (scope === 'act' && act.id === itemId) {
       found = true;
-      label = actLabel(act.title, ai + 1);
+      label = actLabel(act.title, ai + 1, lang);
       blocks.push({ kind: 'heading', level: 1, text: label, part: 'act' });
-    } else if (scope === 'novel' && multiAct) blocks.push({ kind: 'heading', level: 1, text: actLabel(act.title, ai + 1), part: 'act' });
+    } else if (scope === 'novel' && multiAct) blocks.push({ kind: 'heading', level: 1, text: actLabel(act.title, ai + 1, lang), part: 'act' });
     const chapterLevel = scope === 'act' || (scope === 'novel' && multiAct) ? 2 : 1;
     for (const ch of act.chapters) {
       chNo++;
       if (wholeAct || (scope === 'chapter' && ch.id === itemId)) {
-        const text = chapterLabel(ch.title, chNo);
+        const text = chapterLabel(ch.title, chNo, lang);
         if (scope === 'chapter') {
           found = true;
           label = text;
@@ -81,7 +83,7 @@ export function planExport(db: DB, novelId: string, scope: ExportScope, itemId: 
       ch.scenes.forEach((s, i) => {
         if (s.id !== itemId) return;
         found = true;
-        label = sceneLabel(s.title, i + 1);
+        label = sceneLabel(s.title, i + 1, lang);
         const content = scenes.get(s.id)?.content;
         if (content) blocks.push({ kind: 'text', content });
       });
